@@ -2,12 +2,16 @@ from hcsr04 import HCSR04
 from ssd1306 import SSD1306_I2C
 from machine import Pin as pin, PWM, I2C, Timer
 import network, urequests, time
-import ufirebase as firebase
+# import ufirebase as firebase
 from umqtt.simple import MQTTClient
-
+import random
 
 temporiza = Timer(0)                    
 prev_weather = 0
+
+i2c = I2C(0,sda=pin(2),scl=pin(5),freq=40000)
+oled = SSD1306_I2C(128,64,i2c)
+sensor = HCSR04(trigger_pin=18, echo_pin=19, echo_timeout_us=5000)
 
 
 MQTT_CLIENT_ID = ""
@@ -17,6 +21,8 @@ MQTT_USER      = ""
 MQTT_PASSWORD  = ""
 topic_pub     = "nicolas/proyecto" # Eltopic donde vas a publicar
 topic_sub      = 'nicolas/proyecto' # El topic al que te vas a suscribir
+
+
 
 
 
@@ -39,7 +45,7 @@ def conectar(red, contra):
 
 if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
     print('Conexion exitosa!')
-    print(f'Datos de la red  (ip/netmask/gw/dns): {mired.ifconfig()}') 
+    # print(f'Datos de la red  (ip/netmask/gw/dns): {mired.ifconfig()}') 
  
 
     def sub_cb(topic, msg):
@@ -58,22 +64,45 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
     print(f'Connected to {MQTT_BROKER} MQTT broker, subscribed to {topic_sub} topic')
     print("Connected!")
     prev_weather = ""
-
-
-    def desborde (Timer):   
-        global prev_weather
-        numMon = "8"  
     
-        message = numMon
-        if message != prev_weather:
-            print(f"valor publicado en el topic {topic_pub}: {message}")
-            client.publish("nicolas/proyecto", message)
-            prev_weather = message
-
-
-    temporiza.init(period=1000,mode=Timer.PERIODIC,callback=desborde)
-
+    def oledMostrar():
+        oled.text(f'N monedas = {1}', 2, 40, 1)
+        oled.text(f'Total = {1} $', 2, 32, 1)
+        oled.show()
+        oled.text(f'N monedas = {1}', 2, 40, 0)
+        oled.text(f'Total = {1} $', 2, 32, 0)
+    
     while True:
-        print ("esperando") 
-        client.wait_msg() 
+        
+        # aca va el codigo del sensor
+        distance = sensor.distance_cm()
+        print('Distance:', distance, 'cm')
+        
+        if distance > 2 and distance < 4:
+        
+
+            def sub_cb(topic, msg):
+                print(f"llego el topic: {topic} con el valor {msg}")
+
+            def desborde (Timer):   
+                global prev_weather
+        
+                valor = str(random.randint(1,7))
+                # valor = '3'
+    
+                message = valor
+                if message != prev_weather:
+                    print(f"valor publicado en el topic {topic_pub}: {message}  ")
+                    client.publish("nicolas/proyecto", message)
+                prev_weather = message
+
+
+            temporiza.init(period=1000,mode=Timer.PERIODIC,callback=desborde)
+
+
+            while True:
+                print ("esperando") 
+                client.wait_msg()
+        
+        
     
