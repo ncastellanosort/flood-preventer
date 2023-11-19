@@ -5,17 +5,18 @@ import network, urequests, time
 import ufirebase as firebase
 from umqtt.simple import MQTTClient
 
+
 temporiza = Timer(0)                    
 prev_weather = 0
 
 
 MQTT_CLIENT_ID = ""
 
-MQTT_BROKER    = "" # El broker
+MQTT_BROKER    = "broker.hivemq.com" # El broker
 MQTT_USER      = ""
 MQTT_PASSWORD  = ""
-topic_pub     = "nicolas/moneditas" # Eltopic donde vas a publicar
-topic_sub      = 'nicolas/moneditas' # El topic al que te vas a suscribir
+topic_pub     = "nicolas/proyecto" # Eltopic donde vas a publicar
+topic_sub      = 'nicolas/proyecto' # El topic al que te vas a suscribir
 
 
 
@@ -36,7 +37,7 @@ def conectar(red, contra):
             
     return True
 
-if conectar('EYE 2.4G', 'Castellanos2023Ort'):
+if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
     print('Conexion exitosa!')
     print(f'Datos de la red  (ip/netmask/gw/dns): {mired.ifconfig()}') 
  
@@ -66,7 +67,7 @@ if conectar('EYE 2.4G', 'Castellanos2023Ort'):
         message = numMon
         if message != prev_weather:
             print(f"valor publicado en el topic {topic_pub}: {message}")
-            client.publish("nicolas/moneditas", message)
+            client.publish("nicolas/proyecto", message)
             prev_weather = message
 
 
@@ -75,3 +76,4 @@ if conectar('EYE 2.4G', 'Castellanos2023Ort'):
     while True:
         print ("esperando") 
         client.wait_msg() 
+    
