@@ -77,11 +77,6 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
     def notas():
         while True:
             buzzer.duty_u16(32767)
-  
-            buzzer.freq(2637)
-            time.sleep(0.2)
-            buzzer.freq(1568)
-            time.sleep(0.2)
             buzzer.freq(2637)
             time.sleep(0.2)
             buzzer.freq(1568)
@@ -90,9 +85,8 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
     
     while True:
         
-        # aca va el codigo del sensor
         distance = sensor.distance_cm()
-        print('Distance:', distance, 'cm')
+        print('Distancia:', distance, 'cm')
         
         if distance > 2 and distance < 4:
         
