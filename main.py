@@ -1,8 +1,7 @@
 from hcsr04 import HCSR04
 from ssd1306 import SSD1306_I2C
 from machine import Pin as pin, PWM, I2C, Timer
-import network, urequests, time
-# import ufirebase as firebase
+import network, time
 from umqtt.simple import MQTTClient
 import random
 
@@ -14,6 +13,7 @@ i2c = I2C(0,sda=pin(2),scl=pin(5),freq=40000)
 oled = SSD1306_I2C(128,64,i2c)
 sensor = HCSR04(trigger_pin=18, echo_pin=19, echo_timeout_us=5000)
 buzzer = PWM(pin(15))
+buzzer.duty_u16(0)
 
 
 MQTT_CLIENT_ID = ""
@@ -22,7 +22,7 @@ MQTT_BROKER    = "broker.hivemq.com" # El broker
 MQTT_USER      = ""
 MQTT_PASSWORD  = ""
 topic_pub     = "nicolas/proyecto" # Eltopic donde vas a publicar
-topic_sub      = 'nicolas/proyecto' # El topic al que te vas a suscribir
+topic_sub      = 'nicolas/proyecto'
 
 
 
@@ -46,8 +46,7 @@ def conectar(red, contra):
     return True
 
 if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
-    print('Conexion exitosa!')
-    # print(f'Datos de la red  (ip/netmask/gw/dns): {mired.ifconfig()}') 
+    print('Conexion exitosa!') 
  
 
     def sub_cb(topic, msg):
@@ -68,36 +67,79 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
     prev_weather = ""
     
     def oledMostrar():
-        oled.text(f'N monedas = {1}', 2, 40, 1)
-        oled.text(f'Total = {1} $', 2, 32, 1)
+        oled.text(f'ALERTA', 2, 20, 1)
         oled.show()
-        oled.text(f'N monedas = {1}', 2, 40, 0)
-        oled.text(f'Total = {1} $', 2, 32, 0)
-        
+        oled.text(f'ALERTA', 2, 20, 0)
+        oled.show()
+        oled.text(f'ALERTA', 50, 40, 1)
+        oled.show()
+        oled.text(f'ALERTA', 50, 40, 0)
+        oled.show()
+        oled.text(f'ALERTA', 30, 60, 1)
+        oled.show()
+        oled.text(f'ALERTA', 30, 60, 0)
+        oled.show()
+
     def notas():
-        while True:
+
+        x = 0 
+        while x < 25:
             buzzer.duty_u16(32767)
+            
+            print('ALERTA')
+            
+            randomX1 = random.randint(3,110)
+            randomX2 = random.randint(3,110)
+            randomX3 = random.randint(3,110)
+            
+            
+            randomY1 = random.randint(3,56)
+            randomY2 = random.randint(3,56)
+            randomY3 = random.randint(3,56)
+            
+            time.sleep(0.1)
             buzzer.freq(2637)
-            time.sleep(0.2)
+            oled.text(f'ALERTA', randomX1, randomY1, 1)
+            oled.show()
+            oled.text(f'ALERTA', randomX1, randomY1, 0)
             buzzer.freq(1568)
-            time.sleep(0.2)
+            
+            time.sleep(0.1)
+            buzzer.freq(2637)
+            oled.text(f'ALERTA', randomX2, randomY2, 1)
+            oled.show()
+            oled.text(f'ALERTA', randomX2, randomY2, 0)
+            buzzer.freq(1568)
+            
+            time.sleep(0.1)
+            buzzer.freq(2637)
+            oled.text(f'ALERTA', randomX3, randomY3, 1)
+            oled.show()
+            oled.text(f'ALERTA', randomX3, randomY3, 0)
+            buzzer.freq(1568)
+            
+            x += 1
+        buzzer.duty_u16(0)
+        oled.poweroff()
     
     
     while True:
         
         distance = sensor.distance_cm()
-        print('Distancia:', distance, 'cm')
+        print('Distancia del nivel del agua:', distance, 'cm')
         
         if distance > 2 and distance < 4:
+            notas()
         
-
             def sub_cb(topic, msg):
                 print(f"llego el topic: {topic} con el valor {msg}")
 
             def desborde (Timer):   
                 global prev_weather
         
-                valor = str(random.randint(1,7))
+                # valor = str(random.randint(1,7))
+                numRand = str(random.randint(1,100))
+                valor = str(f"ALERTA DE INUNDACION {numRand}")
                 # valor = '3'
     
                 message = valor
@@ -107,7 +149,7 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
                 prev_weather = message
 
 
-            temporiza.init(period=1000,mode=Timer.PERIODIC,callback=desborde)
+            temporiza.init(period=2000,mode=Timer.PERIODIC,callback=desborde)
 
 
             while True:
