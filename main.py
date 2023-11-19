@@ -6,12 +6,14 @@ import network, urequests, time
 from umqtt.simple import MQTTClient
 import random
 
+
 temporiza = Timer(0)                    
 prev_weather = 0
 
 i2c = I2C(0,sda=pin(2),scl=pin(5),freq=40000)
 oled = SSD1306_I2C(128,64,i2c)
 sensor = HCSR04(trigger_pin=18, echo_pin=19, echo_timeout_us=5000)
+buzzer = PWM(pin(15))
 
 
 MQTT_CLIENT_ID = ""
@@ -71,6 +73,20 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
         oled.show()
         oled.text(f'N monedas = {1}', 2, 40, 0)
         oled.text(f'Total = {1} $', 2, 32, 0)
+        
+    def notas():
+        while True:
+            buzzer.duty_u16(32767)
+  
+            buzzer.freq(2637)
+            time.sleep(0.2)
+            buzzer.freq(1568)
+            time.sleep(0.2)
+            buzzer.freq(2637)
+            time.sleep(0.2)
+            buzzer.freq(1568)
+            time.sleep(0.2)
+    
     
     while True:
         
