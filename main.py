@@ -1,10 +1,9 @@
 from hcsr04 import HCSR04
 from ssd1306 import SSD1306_I2C
 from machine import Pin as pin, PWM, I2C, Timer
-import network, time
+import network, time, random, urequests
 from umqtt.simple import MQTTClient
-import random
-import urequests, ujson
+import ufirebase as firebase
 
 
 temporiza = Timer(0)                    
@@ -15,15 +14,6 @@ oled = SSD1306_I2C(128,64,i2c)
 sensor = HCSR04(trigger_pin=18, echo_pin=19, echo_timeout_us=5000)
 buzzer = PWM(pin(15))
 buzzer.duty_u16(0)
-
-
-MQTT_CLIENT_ID = ""
-
-MQTT_BROKER    = "broker.hivemq.com" # El broker
-MQTT_USER      = ""
-MQTT_PASSWORD  = ""
-topic_pub     = "nicolas/proyecto" # Eltopic donde vas a publicar
-topic_sub      = 'nicolas/proyecto'
 
 
 def conectar(red, contra):
@@ -46,10 +36,14 @@ def conectar(red, contra):
 if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
     print('Conexion exitosa!') 
     
-    # ver datos del clima
-    uri = 'https://api.openweathermap.org/data/2.5/weather?q=Arauca&appid=84c3b570d602a28aa69e9796925026a1&units=metric&lang=es'
+    #firebase
+    firebase.setURL("https://inundaciones-b944d-default-rtdb.firebaseio.com/")
 
-    respuesta = urequests.get(uri)
+    
+   
+    uriWeather = 'https://api.openweathermap.org/data/2.5/weather?q=Cordoba,CO&appid=84c3b570d602a28aa69e9796925026a1&units=metric&lang=es'
+
+    respuesta = urequests.get(uriWeather)
 
     datos = respuesta.json()
     
@@ -60,8 +54,6 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
     humedadClima = datos['main']['humidity']
     
     
-
-    # print(datos)
     print(f'\nEstado del clima: {hay_nubes}')
     print(f'Descripcion del clima: {descripcionNubes}')
     print(f'Nubosidad: {nubosidad} %')
@@ -70,25 +62,7 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
 
     respuesta.close()
     # hasta aca
- 
 
-    def sub_cb(topic, msg):
-        print(f"llego el topic: {topic} con el valor {msg}")
-
-
-    print("Connecting to MQTT server... ", end="")
-    client = MQTTClient(MQTT_CLIENT_ID, MQTT_BROKER, user=MQTT_USER, password=MQTT_PASSWORD)
-
-    client.set_callback(sub_cb)
-
-    client.connect()
-
-    client.subscribe(topic_sub)
-
-    # print(f'Connected to {MQTT_BROKER} MQTT broker, subscribed to {topic_sub} topic')
-    print("Connected!")
-    prev_weather = ""
-    
     def oledMostrar():
         oled.text(f'ALERTA', 2, 20, 1)
         oled.show()
@@ -108,27 +82,8 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
         x = 0 
         while x < 25:
             buzzer.duty_u16(32767)
-            
-            # print('ALERTA')
-            
-            def sub_cb(topic, msg):
-                print(f"llego el topic: {topic} con el valor {msg}")
-            
 
-            def desborde (Timer):   
-                global prev_weather
-        
-                numRand = str(random.randint(1,100))
-                valor = str(f"ALERTA DE POSIBLE INUNDACION {numRand}")
-    
-                message = valor
-                if message != prev_weather:
-                    # print(f"valor publicado en el topic {topic_pub}: {message}  ")
-                    client.publish("nicolas/proyecto", message)
-                prev_weather = message
-
-
-            temporiza.init(period=1000,mode=Timer.PERIODIC,callback=desborde)
+            firebase.put("Inundaciones/alertas", "ALERTA DE INUNDACION", bg=0)
             
             randomX1 = random.randint(3,110)
             randomX2 = random.randint(3,110)
@@ -169,7 +124,8 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
     while True:
         
         distance = round(sensor.distance_cm(), 1)
-        # print('Distancia del nivel del agua:', distance, 'cm')
+
+        firebase.put("Inundaciones/distancia", str(distance), bg=0)
         
         if distance > 9:
             oled.text(f'Alerta a 3m', 17, 28, 1)
@@ -203,7 +159,6 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
             oled.text(f'*NIVEL DE AGUA*', 2, 28, 0)
 
         
-        # Peligro Total y suena la alarma
         elif distance > 2.9 and distance < 3.1:
             alarmaYmqttmssgs()
 
