@@ -25,9 +25,6 @@ topic_pub     = "nicolas/proyecto" # Eltopic donde vas a publicar
 topic_sub      = 'nicolas/proyecto'
 
 
-
-
-
 def conectar(red, contra):
     global mired
     
@@ -80,13 +77,32 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
         oled.text(f'ALERTA', 30, 60, 0)
         oled.show()
 
-    def notas():
+    def alarmaYmqttmssgs():
 
         x = 0 
         while x < 25:
             buzzer.duty_u16(32767)
             
             print('ALERTA')
+            
+            def sub_cb(topic, msg):
+                print(f"llego el topic: {topic} con el valor {msg}")
+            
+
+            def desborde (Timer):   
+                global prev_weather
+        
+                numRand = str(random.randint(1,100))
+                valor = str(f"ALERTA DE POSIBLE INUNDACION {numRand}")
+    
+                message = valor
+                if message != prev_weather:
+                    print(f"valor publicado en el topic {topic_pub}: {message}  ")
+                    client.publish("nicolas/proyecto", message)
+                prev_weather = message
+
+
+            temporiza.init(period=1000,mode=Timer.PERIODIC,callback=desborde)
             
             randomX1 = random.randint(3,110)
             randomX2 = random.randint(3,110)
@@ -118,6 +134,8 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
             oled.text(f'ALERTA', randomX3, randomY3, 0)
             buzzer.freq(1568)
             
+
+            
             x += 1
         buzzer.duty_u16(0)
         oled.poweroff()
@@ -128,33 +146,10 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
         distance = sensor.distance_cm()
         print('Distancia del nivel del agua:', distance, 'cm')
         
+        
         if distance > 2 and distance < 4:
-            notas()
-        
-            def sub_cb(topic, msg):
-                print(f"llego el topic: {topic} con el valor {msg}")
+            alarmaYmqttmssgs()
 
-            def desborde (Timer):   
-                global prev_weather
-        
-                # valor = str(random.randint(1,7))
-                numRand = str(random.randint(1,100))
-                valor = str(f"ALERTA DE INUNDACION {numRand}")
-                # valor = '3'
-    
-                message = valor
-                if message != prev_weather:
-                    print(f"valor publicado en el topic {topic_pub}: {message}  ")
-                    client.publish("nicolas/proyecto", message)
-                prev_weather = message
-
-
-            temporiza.init(period=2000,mode=Timer.PERIODIC,callback=desborde)
-
-
-            while True:
-                print ("esperando") 
-                client.wait_msg()
         
         
     
