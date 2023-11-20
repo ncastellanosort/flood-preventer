@@ -2,7 +2,6 @@ from hcsr04 import HCSR04
 from ssd1306 import SSD1306_I2C
 from machine import Pin as pin, PWM, I2C, Timer
 import network, time, random, urequests
-from umqtt.simple import MQTTClient
 import ufirebase as firebase
 
 
@@ -36,9 +35,8 @@ def conectar(red, contra):
 if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
     print('Conexion exitosa!') 
     
-    #firebase
+    
     firebase.setURL("https://inundaciones-b944d-default-rtdb.firebaseio.com/")
-
     
    
     uriWeather = 'https://api.openweathermap.org/data/2.5/weather?q=Cordoba,CO&appid=84c3b570d602a28aa69e9796925026a1&units=metric&lang=es'
@@ -125,41 +123,56 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
         
         distance = round(sensor.distance_cm(), 1)
 
-        firebase.put("Inundaciones/distancia", str(distance), bg=0)
+        firebase.put("Inundaciones/sensor/distancia", str(distance) + 'cm', bg=0)
+        
+        firebase.put("Inundaciones/clima/estado_clima", str(hay_nubes), bg=0)
+        firebase.put("Inundaciones/clima/descripcion_clima", str(descripcionNubes), bg=0)
+        firebase.put("Inundaciones/clima/nubosidad", str(nubosidad) + '%', bg=0)
+        firebase.put("Inundaciones/clima/velocidad_viento", str(velocidadViento) + 'km/h', bg=0)
+        firebase.put("Inundaciones/clima/humedad", str(humedadClima) + '%', bg=0)
         
         if distance > 9:
-            oled.text(f'Alerta a 3m', 17, 28, 1)
-            oled.text(f'Distancia agua:', 2, 42, 1)
-            oled.text(f'{distance} m', 2, 52, 1)
-            oled.show()
-            oled.text(f'Distancia agua:', 2, 42, 0)
-            oled.text(f'{distance} m', 2, 52, 0)
-            oled.text(f'Alerta a 3m', 17, 28, 0)
+            print('relax')
+            firebase.put("Inundaciones/nivel_agua/estado", "Sin preocupacion", bg=0)
+            # oled.text(f'Alerta a 3m', 17, 28, 1)
+            # oled.text(f'Distancia agua:', 2, 42, 1)
+            # oled.text(f'{distance} m', 2, 52, 1)
+            # oled.show()
+            # oled.text(f'Distancia agua:', 2, 42, 0)
+            # oled.text(f'{distance} m', 2, 52, 0)
+            # oled.text(f'Alerta a 3m', 17, 28, 0)
         
         elif distance > 6.3 and distance < 8.1:
-            oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
-            oled.text(f'Normal', 17, 42, 1)
-            oled.show()
-            oled.text(f'Normal', 17, 42, 0)
-            oled.text(f'*NIVEL DE AGUA*', 2, 28, 0)
+            print('Normal')
+            firebase.put("Inundaciones/nivel_agua/estado", "Normal", bg=0)
+            # oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
+            # oled.text(f'Normal', 17, 42, 1)
+            # oled.show()
+            # oled.text(f'Normal', 17, 42, 0)
+            # oled.text(f'*NIVEL DE AGUA*', 2, 28, 0)
         
         elif distance > 4.1 and distance < 6.2:
-            oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
-            oled.text(f'Creciente', 17, 42, 1)
-            oled.show()
-            oled.text(f'Creciente', 17, 42, 0)
-            oled.text(f'*NIVEL DE AGUA*', 2, 28, 0)
+            print('Creciente')
+            firebase.put("Inundaciones/nivel_agua/estado", "Nivel de agua Creciente", bg=0)
+            # oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
+            # oled.text(f'Creciente', 17, 42, 1)
+            # oled.show()
+            # oled.text(f'Creciente', 17, 42, 0)
+            # oled.text(f'*NIVEL DE AGUA*', 2, 28, 0)
             
             
         elif distance > 3.5 and distance < 4:
-            oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
-            oled.text(f'Peligro', 17, 42, 1)
-            oled.show()
-            oled.text(f'Peligro', 17, 42, 0)
-            oled.text(f'*NIVEL DE AGUA*', 2, 28, 0)
+            print('Peligro')
+            firebase.put("Inundaciones/nivel_agua/estado", "Peligro, este atento a los niveles del sensor", bg=0)
+            # oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
+            # oled.text(f'Peligro', 17, 42, 1)
+            # oled.show()
+            # oled.text(f'Peligro', 17, 42, 0)
+            # oled.text(f'*NIVEL DE AGUA*', 2, 28, 0)
 
         
-        elif distance > 2.9 and distance < 3.1:
+        elif distance > 0 and distance < 3.1:
+            firebase.put("Inundaciones/estado", "Peligro Extremo, evacue la zona" + '%', bg=0)
             alarmaYmqttmssgs()
 
         
