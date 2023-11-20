@@ -2,6 +2,7 @@ from hcsr04 import HCSR04
 from ssd1306 import SSD1306_I2C
 from machine import Pin as pin, PWM, I2C, Timer
 import network, time, random, urequests
+import dht
 import ufirebase as firebase
 
 
@@ -135,6 +136,10 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
     while True:
         
         distance = round(sensor.distance_cm(), 1)
+        
+        hHumedad = dht.DHT11(pin(5))
+        
+        sensorHumedad = hHumedad.humidity()
 
         firebase.put("Inundaciones/sensor/distancia", str(distance) + 'cm', bg=0)
         
@@ -143,6 +148,7 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
         firebase.put("Inundaciones/clima/nubosidad", str(nubosidad) + '%', bg=0)
         firebase.put("Inundaciones/clima/velocidad_viento", str(velocidadViento) + 'km/h', bg=0)
         firebase.put("Inundaciones/clima/humedad", str(humedadClima) + '%', bg=0)
+        firebase.put("Inundaciones/sensor/humedad", str(sensorHumedad) + '%', bg=0)
         
         if distance > 9:
             firebase.put("Inundaciones/nivel_agua/estado", "Sin preocupacion", bg=0)
@@ -163,7 +169,7 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
             
         
         elif distance > 6.3 and distance < 8.1:
-            firebase.put("Inundaciones/nivel_agua/estado", "Normal", bg=0)
+            firebase.put("Inundaciones/nivel_agua/estadoO", "Normal", bg=0)
             oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
             oled.text(f'Normal', 17, 42, 1)
             oled.show()
@@ -177,7 +183,7 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
             respuesta_iftttnormalSMS.close()
         
         elif distance > 4.1 and distance < 6.2 and nubosidad > 55:
-            firebase.put("Inundaciones/nivel_agua/estado", "Nivel de agua Creciente", bg=0)
+            firebase.put("Inundaciones/nivel_agua/estadoO", "Nivel de agua Creciente", bg=0)
             oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
             oled.text(f'Creciente', 17, 42, 1)
             oled.show()
@@ -191,7 +197,7 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
             
             
         elif distance > 3.5 and distance < 4 and nubosidad > 65 and velocidadViento > 0.5 and velocidadViento < 0.9:
-            firebase.put("Inundaciones/nivel_agua/estado", "Peligro, este atento a los niveles del sensor", bg=0)
+            firebase.put("Inundaciones/nivel_agua/estadoO", "Peligro, este atento a los niveles del sensor", bg=0)
             oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
             oled.text(f'Peligro', 17, 42, 1)
             oled.show()
@@ -207,7 +213,7 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
         
         elif distance > 0 and distance < 3.1 and nubosidad > 75 and velocidadViento > 1:
             alarmaYmqttmssgs()
-            firebase.put("Inundaciones/estado", "Peligro Extremo, evacue la zona" + '%', bg=0)
+            firebase.put("Inundaciones/estado", "Peligro Extremo, evacue la zona", bg=0)
             respuesta_iftttfatal = urequests.get(uriIFTTTfatal)
             respuesta_iftttfatal.close()
             
