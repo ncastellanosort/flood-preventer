@@ -4,6 +4,7 @@ from machine import Pin as pin, PWM, I2C, Timer
 import network, time
 from umqtt.simple import MQTTClient
 import random
+import urequests, ujson
 
 
 temporiza = Timer(0)                    
@@ -44,6 +45,31 @@ def conectar(red, contra):
 
 if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
     print('Conexion exitosa!') 
+    
+    # ver datos del clima
+    uri = 'https://api.openweathermap.org/data/2.5/weather?q=Arauca&appid=84c3b570d602a28aa69e9796925026a1&units=metric&lang=es'
+
+    respuesta = urequests.get(uri)
+
+    datos = respuesta.json()
+    
+    hay_nubes = datos['weather'][0]['main']
+    descripcionNubes = datos['weather'][0]['description']
+    nubosidad = datos['clouds']['all']
+    velocidadViento = datos['wind']['speed']
+    humedadClima = datos['main']['humidity']
+    
+    
+
+    # print(datos)
+    print(f'\nEstado del clima: {hay_nubes}')
+    print(f'Descripcion del clima: {descripcionNubes}')
+    print(f'Nubosidad: {nubosidad} %')
+    print(f'Velocidad del viento: {velocidadViento} km/h')
+    print(f'Humedad: {humedadClima} %\n')
+
+    respuesta.close()
+    # hasta aca
  
 
     def sub_cb(topic, msg):
@@ -59,7 +85,7 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
 
     client.subscribe(topic_sub)
 
-    print(f'Connected to {MQTT_BROKER} MQTT broker, subscribed to {topic_sub} topic')
+    # print(f'Connected to {MQTT_BROKER} MQTT broker, subscribed to {topic_sub} topic')
     print("Connected!")
     prev_weather = ""
     
@@ -83,7 +109,7 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
         while x < 25:
             buzzer.duty_u16(32767)
             
-            print('ALERTA')
+            # print('ALERTA')
             
             def sub_cb(topic, msg):
                 print(f"llego el topic: {topic} con el valor {msg}")
@@ -97,7 +123,7 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
     
                 message = valor
                 if message != prev_weather:
-                    print(f"valor publicado en el topic {topic_pub}: {message}  ")
+                    # print(f"valor publicado en el topic {topic_pub}: {message}  ")
                     client.publish("nicolas/proyecto", message)
                 prev_weather = message
 
@@ -134,20 +160,51 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
             oled.text(f'ALERTA', randomX3, randomY3, 0)
             buzzer.freq(1568)
             
-
-            
             x += 1
+            
         buzzer.duty_u16(0)
         oled.poweroff()
     
     
     while True:
         
-        distance = sensor.distance_cm()
-        print('Distancia del nivel del agua:', distance, 'cm')
+        distance = round(sensor.distance_cm(), 1)
+        # print('Distancia del nivel del agua:', distance, 'cm')
         
+        if distance > 9:
+            oled.text(f'Alerta a 3m', 17, 28, 1)
+            oled.text(f'Distancia agua:', 2, 42, 1)
+            oled.text(f'{distance} m', 2, 52, 1)
+            oled.show()
+            oled.text(f'Distancia agua:', 2, 42, 0)
+            oled.text(f'{distance} m', 2, 52, 0)
+            oled.text(f'Alerta a 3m', 17, 28, 0)
         
-        if distance > 2 and distance < 4:
+        elif distance > 6.3 and distance < 8.1:
+            oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
+            oled.text(f'Normal', 17, 42, 1)
+            oled.show()
+            oled.text(f'Normal', 17, 42, 0)
+            oled.text(f'*NIVEL DE AGUA*', 2, 28, 0)
+        
+        elif distance > 4.1 and distance < 6.2:
+            oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
+            oled.text(f'Creciente', 17, 42, 1)
+            oled.show()
+            oled.text(f'Creciente', 17, 42, 0)
+            oled.text(f'*NIVEL DE AGUA*', 2, 28, 0)
+            
+            
+        elif distance > 3.5 and distance < 4:
+            oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
+            oled.text(f'Peligro', 17, 42, 1)
+            oled.show()
+            oled.text(f'Peligro', 17, 42, 0)
+            oled.text(f'*NIVEL DE AGUA*', 2, 28, 0)
+
+        
+        # Peligro Total y suena la alarma
+        elif distance > 2.9 and distance < 3.1:
             alarmaYmqttmssgs()
 
         
