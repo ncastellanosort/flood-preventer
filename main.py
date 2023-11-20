@@ -48,6 +48,18 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
     
     uriIFTTTfatal = 'https://maker.ifttt.com/trigger/alertaFatal/with/key/bqi1MHa97eZqxTiyvAmOPi0zjjz9ebMpWUaWlNks1FM?'
     
+    
+    
+    uriSMStranquilo = 'https://maker.ifttt.com/trigger/alertaSMSTranquilo/with/key/bqi1MHa97eZqxTiyvAmOPi0zjjz9ebMpWUaWlNks1FM?'
+    
+    uriSMSnormal = 'https://maker.ifttt.com/trigger/alertaSMSNormal/with/key/bqi1MHa97eZqxTiyvAmOPi0zjjz9ebMpWUaWlNks1FM?'
+    
+    uriSMScreciente = 'https://maker.ifttt.com/trigger/alertaSMSCreciente/with/key/bqi1MHa97eZqxTiyvAmOPi0zjjz9ebMpWUaWlNks1FM?'
+    
+    uriSMSpeligro = 'https://maker.ifttt.com/trigger/alertaSMSPeligro/with/key/bqi1MHa97eZqxTiyvAmOPi0zjjz9ebMpWUaWlNks1FM?'
+    
+    uriSMSfatal = 'https://maker.ifttt.com/trigger/alertaSMSFatal/with/key/bqi1MHa97eZqxTiyvAmOPi0zjjz9ebMpWUaWlNks1FM?'
+    
    
     uriWeather = 'https://api.openweathermap.org/data/2.5/weather?q=Cordoba,CO&appid=84c3b570d602a28aa69e9796925026a1&units=metric&lang=es'
 
@@ -144,6 +156,9 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
             
             respuesta_ifttttranquilo = urequests.get(uriIFTTTtranquilo)
             respuesta_ifttttranquilo.close()
+            
+            respuesta_ifttttranquiloSMS = urequests.get(uriSMStranquilo)
+            respuesta_ifttttranquiloSMS.close()
 
             
         
@@ -157,6 +172,9 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
             
             respuesta_iftttnormal = urequests.get(uriIFTTTnormal)
             respuesta_iftttnormal.close()
+            
+            respuesta_iftttnormalSMS = urequests.get(uriSMSnormal)
+            respuesta_iftttnormalSMS.close()
         
         elif distance > 4.1 and distance < 6.2 and nubosidad > 55:
             firebase.put("Inundaciones/nivel_agua/estado", "Nivel de agua Creciente", bg=0)
@@ -167,6 +185,9 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
             oled.text(f'-NIVEL DE AGUA-', 2, 28, 0)
             respuesta_iftttcreciente = urequests.get(uriIFTTTcreciente)
             respuesta_iftttcreciente.close()
+            
+            respuesta_iftttcrecienteSMS = urequests.get(uriSMScreciente)
+            respuesta_iftttcrecienteSMS.close()
             
             
         elif distance > 3.5 and distance < 4 and nubosidad > 65 and velocidadViento > 0.5 and velocidadViento < 0.9:
@@ -179,6 +200,9 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
             
             respuesta_iftttpeligro = urequests.get(uriIFTTTpeligro)
             respuesta_iftttpeligro.close()
+            
+            respuesta_iftttpeligroSMS = urequests.get(uriSMSpeligro)
+            respuesta_iftttpeligroSMS.close()
 
         
         elif distance > 0 and distance < 3.1 and nubosidad > 75 and velocidadViento > 1:
@@ -186,6 +210,9 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
             firebase.put("Inundaciones/estado", "Peligro Extremo, evacue la zona" + '%', bg=0)
             respuesta_iftttfatal = urequests.get(uriIFTTTfatal)
             respuesta_iftttfatal.close()
+            
+            respuesta_iftttfatalSMS = urequests.get(uriSMSfatal)
+            respuesta_iftttfatalSMS.close()
             
 
         
