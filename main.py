@@ -1,5 +1,5 @@
 from hcsr04 import HCSR04
-from ssd1306 import SSD1306_I2C
+# from ssd1306 import SSD1306_I2C
 from machine import Pin as pin, PWM, I2C, Timer
 import network, time, random, urequests
 import dht
@@ -10,7 +10,7 @@ temporiza = Timer(0)
 prev_weather = 0
 
 i2c = I2C(0,sda=pin(2),scl=pin(5),freq=40000)
-oled = SSD1306_I2C(128,64,i2c)
+# oled = SSD1306_I2C(128,64,i2c)
 sensor = HCSR04(trigger_pin=18, echo_pin=19, echo_timeout_us=5000)
 buzzer = PWM(pin(15))
 buzzer.duty_u16(0)
@@ -33,7 +33,7 @@ def conectar(red, contra):
             
     return True
 
-if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
+if conectar('iPhone de Nicolas', 'arquitectura123'):
     print('Conexion exitosa!') 
     
     
@@ -94,43 +94,43 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
             firebase.put("Inundaciones/alertas", "ALERTA DE INUNDACION", bg=0)
             firebase.delete("Inundaciones/alertas")
             
-            randomX1 = random.randint(3,110)
-            randomX2 = random.randint(3,110)
-            randomX3 = random.randint(3,110)
+            # randomX1 = random.randint(3,110)
+            # randomX2 = random.randint(3,110)
+            # randomX3 = random.randint(3,110)
             
             
-            randomY1 = random.randint(3,56)
-            randomY2 = random.randint(3,56)
-            randomY3 = random.randint(3,56)
+            # randomY1 = random.randint(3,56)
+            # randomY2 = random.randint(3,56)
+            # randomY3 = random.randint(3,56)
             
             time.sleep(0.1)
             buzzer.freq(2637)
             time.sleep(0.1)
-            oled.text(f'ALERTA', randomX1, randomY1, 1)
-            oled.show()
-            oled.text(f'ALERTA', randomX1, randomY1, 0)
+            # oled.text(f'ALERTA', randomX1, randomY1, 1)
+            # oled.show()
+            # oled.text(f'ALERTA', randomX1, randomY1, 0)
             buzzer.freq(1568)
             
             time.sleep(0.1)
             buzzer.freq(2637)
             time.sleep(0.1)
-            oled.text(f'ALERTA', randomX2, randomY2, 1)
-            oled.show()
-            oled.text(f'ALERTA', randomX2, randomY2, 0)
+            # oled.text(f'ALERTA', randomX2, randomY2, 1)
+            # oled.show()
+            # oled.text(f'ALERTA', randomX2, randomY2, 0)
             buzzer.freq(1568)
             
             time.sleep(0.1)
             buzzer.freq(2637)
             time.sleep(0.1)
-            oled.text(f'ALERTA', randomX3, randomY3, 1)
-            oled.show()
-            oled.text(f'ALERTA', randomX3, randomY3, 0)
+            # oled.text(f'ALERTA', randomX3, randomY3, 1)
+            # oled.show()
+            # oled.text(f'ALERTA', randomX3, randomY3, 0)
             buzzer.freq(1568)
             
             x += 1
             
         buzzer.duty_u16(0)
-        oled.poweroff()
+        # oled.poweroff()
     
     
     while True:
@@ -148,17 +148,18 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
         firebase.put("Inundaciones/clima/nubosidad", str(nubosidad) + '%', bg=0)
         firebase.put("Inundaciones/clima/velocidad_viento", str(velocidadViento) + 'km/h', bg=0)
         firebase.put("Inundaciones/clima/humedad", str(humedadClima) + '%', bg=0)
+        
         firebase.put("Inundaciones/sensor/humedad", str(sensorHumedad) + '%', bg=0)
         
         if distance > 9:
             firebase.put("Inundaciones/nivel_agua/estado", "Sin preocupacion", bg=0)
-            oled.text(f'Alerta a 3m', 17, 28, 1)
-            oled.text(f'Distancia agua:', 2, 42, 1)
-            oled.text(f'{distance} m', 2, 52, 1)
-            oled.show()
-            oled.text(f'Distancia agua:', 2, 42, 0)
-            oled.text(f'{distance} m', 2, 52, 0)
-            oled.text(f'Alerta a 3m', 17, 28, 0)
+            # oled.text(f'Alerta a 3m', 17, 28, 1)
+            # oled.text(f'Distancia agua:', 2, 42, 1)
+            # oled.text(f'{distance} m', 2, 52, 1)
+            # oled.show()
+            # oled.text(f'Distancia agua:', 2, 42, 0)
+            # oled.text(f'{distance} m', 2, 52, 0)
+            # oled.text(f'Alerta a 3m', 17, 28, 0)
             
             respuesta_ifttttranquilo = urequests.get(uriIFTTTtranquilo)
             respuesta_ifttttranquilo.close()
@@ -170,11 +171,11 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
         
         elif distance > 6.3 and distance < 8.1:
             firebase.put("Inundaciones/nivel_agua/estadoO", "Normal", bg=0)
-            oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
-            oled.text(f'Normal', 17, 42, 1)
-            oled.show()
-            oled.text(f'Normal', 17, 42, 0)
-            oled.text(f'-NIVEL DE AGUA-', 2, 28, 0)
+            # oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
+            # oled.text(f'Normal', 17, 42, 1)
+            # oled.show()
+            # oled.text(f'Normal', 17, 42, 0)
+            # oled.text(f'-NIVEL DE AGUA-', 2, 28, 0)
             
             respuesta_iftttnormal = urequests.get(uriIFTTTnormal)
             respuesta_iftttnormal.close()
@@ -184,11 +185,11 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
         
         elif distance > 4.1 and distance < 6.2 and nubosidad > 55:
             firebase.put("Inundaciones/nivel_agua/estadoO", "Nivel de agua Creciente", bg=0)
-            oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
-            oled.text(f'Creciente', 17, 42, 1)
-            oled.show()
-            oled.text(f'Creciente', 17, 42, 0)
-            oled.text(f'-NIVEL DE AGUA-', 2, 28, 0)
+            # oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
+            # oled.text(f'Creciente', 17, 42, 1)
+            # oled.show()
+            # oled.text(f'Creciente', 17, 42, 0)
+            # oled.text(f'-NIVEL DE AGUA-', 2, 28, 0)
             respuesta_iftttcreciente = urequests.get(uriIFTTTcreciente)
             respuesta_iftttcreciente.close()
             
@@ -198,11 +199,11 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
             
         elif distance > 3.5 and distance < 4 and nubosidad > 65 and velocidadViento > 0.5 and velocidadViento < 0.9:
             firebase.put("Inundaciones/nivel_agua/estadoO", "Peligro, este atento a los niveles del sensor", bg=0)
-            oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
-            oled.text(f'Peligro', 17, 42, 1)
-            oled.show()
-            oled.text(f'Peligro', 17, 42, 0)
-            oled.text(f'-NIVEL DE AGUA-', 2, 28, 0)
+            # oled.text(f'-NIVEL DE AGUA-', 2, 28, 1)
+            # oled.text(f'Peligro', 17, 42, 1)
+            # oled.show()
+            # oled.text(f'Peligro', 17, 42, 0)
+            # oled.text(f'-NIVEL DE AGUA-', 2, 28, 0)
             
             respuesta_iftttpeligro = urequests.get(uriIFTTTpeligro)
             respuesta_iftttpeligro.close()
@@ -211,6 +212,7 @@ if conectar('EYE3 2.4G', 'Castellanos2023Ort'):
             respuesta_iftttpeligroSMS.close()
 
         
+        # elif distance > 0 and distance < 3.1 and nubosidad > 75 and velocidadViento > 1:
         elif distance > 0 and distance < 3.1 and nubosidad > 75 and velocidadViento > 1:
             alarmaYmqttmssgs()
             firebase.put("Inundaciones/estado", "Peligro Extremo, evacue la zona", bg=0)
